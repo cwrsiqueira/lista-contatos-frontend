@@ -2,6 +2,7 @@
 
 import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
 export default function LoginForm() {
   const searchParams = useSearchParams();
@@ -42,9 +43,11 @@ export default function LoginForm() {
       <button className="btn btn-primary w-full" type="submit">
         Login
       </button>
-      {error === "CredentialsSignin" && (
-        <div className="text-red-500">Credenciais Inválidas!</div>
-      )}
+      <Suspense>
+        {error === "CredentialsSignin" && (
+          <div className="text-red-500">Credenciais Inválidas!</div>
+        )}
+      </Suspense>
     </form>
   );
 }
