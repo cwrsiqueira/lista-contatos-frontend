@@ -2,16 +2,21 @@
 
 import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 
 function ErrorParams() {
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
-
-  return error && error === "CredentialsSignin";
+  if (error && error === "CredentialsSignin") {
+    return <div className="text-red-500">Credenciais Inválidas!</div>;
+  }
+  return <div></div>;
 }
 
 export default function LoginForm() {
+  const [email, setEmail] = useState("cwrsiqueira@msn.com");
+  const [password, setPassword] = useState("carlos_1909");
+
   async function login(e) {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -36,20 +41,22 @@ export default function LoginForm() {
         type="email"
         placeholder="E-mail"
         className="input input-primary w-full"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
       />
       <input
         name="password"
         type="password"
         placeholder="Senha"
         className="input input-primary w-full"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
       />
       <button className="btn btn-primary w-full" type="submit">
         Login
       </button>
       <Suspense>
-        {ErrorParams && (
-          <div className="text-red-500">Credenciais Inválidas!</div>
-        )}
+        <ErrorParams />
       </Suspense>
     </form>
   );
