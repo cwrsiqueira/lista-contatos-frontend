@@ -16,6 +16,12 @@ const AddForm = () => {
 
   const router = useRouter();
 
+  /**
+   * Função recebe os dados do formulário, trata e valida os dados, envia os dados para a API
+   * Emite as mensagens de erro ou sucesso, que são tratadas nas respectivas telas
+   * @param {evento} e
+   * @returns void | null
+   */
   const addContact = (e) => {
     e.preventDefault();
     if (name === "" || cpf === "" || telephone === "" || address === "") {

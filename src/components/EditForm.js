@@ -17,12 +17,17 @@ export default function EditForm({ id }) {
 
   const router = useRouter();
 
+  /**
+   * Chama a função que busca os dados do contato quando a variável id é alterada
+   * e ao gerar a página
+   */
   useEffect(() => {
     handleFetchData();
   }, [id]);
 
-  useEffect(() => {}, []);
-
+  /**
+   * Faz a chamada à API que busca os dados do contato
+   */
   const handleFetchData = () => {
     fetchClient(`http://localhost:3001/api/contacts/${id}`).then(
       async (response) => {
@@ -38,6 +43,13 @@ export default function EditForm({ id }) {
     );
   };
 
+  /**
+   * Função recebe os dados do formulário, trata e valida os dados
+   * Faz a chamada à API que busca os dados do contato
+   * Preenche o formulário ou emite as mensagens pertinentes
+   * @param {evento} e
+   * @returns void | null
+   */
   const editContact = (e) => {
     e.preventDefault();
     if (name === "" || cpf === "" || telephone === "" || address === "") {
@@ -47,9 +59,15 @@ export default function EditForm({ id }) {
       return null;
     }
 
+    /**
+     * Sanitaliza os dados para o padrão do banco de dados
+     */
     const newCpf = cpf.replace(/\D/g, "");
     const newTelephone = telephone.replace(/\D/g, "");
 
+    /**
+     * Valida a quantidade de caracteres do CPF
+     */
     if (newCpf.length !== 11) {
       setAlert(true);
       setAlertTipo("error");
@@ -64,6 +82,9 @@ export default function EditForm({ id }) {
       address,
     };
 
+    /**
+     * Faz a requisição à API
+     */
     fetchClient(`http://localhost:3001/api/contacts/${id}`, {
       method: "PUT",
       body: JSON.stringify(data),
@@ -73,7 +94,6 @@ export default function EditForm({ id }) {
         setAlert(true);
         setAlertTipo("success");
         setAlertMsg("Contato editado com sucesso!");
-        // router.push(`/contacts/edit/${id}?success=contactEdited`);
       } else {
         setAlert(true);
         setAlertTipo("error");
@@ -90,7 +110,6 @@ export default function EditForm({ id }) {
           onSubmit={editContact}
           className="container bg-white p-12 rounded-lg w-full flex justify-center items-center flex-col gap-2"
         >
-          {/* <MsgParams /> */}
           {alert && (
             <div role="alert" className={`alert alert-${alertTipo}`}>
               <svg

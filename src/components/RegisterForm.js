@@ -7,7 +7,7 @@ import Image from "next/image";
 import Logo from "../../public/logo.jpg";
 
 /**
- * Função verifica as mensagens na URL e retorna um elemento com a respectiva mensagem
+ *  Função/Componente para tratar as mensagens de erro ou sucesso que vem através da URL como parâmetros
  * @returns elemento | componente
  */
 function MsgParams() {
@@ -86,7 +86,7 @@ export default function RegisterForm() {
   const router = useRouter();
 
   /**
-   * Função recebe os dados do formulário, faz as validações e faz uma chamada na API que registra o usuário.
+   * Função que recebe os dados do formulário, faz as validações e faz a chamada à API que registra o usuário.
    * Se der certo direciona para página de login com a mensagem de sucesso, caso contrário mantém na mesma página
    * com uma mensagem de erro.
    * @param {evento} e

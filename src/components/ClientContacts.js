@@ -8,6 +8,10 @@ import { IMaskInput } from "react-imask";
 import { FaPenToSquare } from "react-icons/fa6";
 import { FaTrashCan } from "react-icons/fa6";
 
+/**
+ *  Função/Componente para tratar as mensagens de erro ou sucesso que vem através da URL como parâmetros
+ * @returns elemento | componente
+ */
 function MsgParams() {
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
@@ -61,14 +65,26 @@ export default function ClientContacts() {
   const [search, setSearch] = useState("");
   const [filteredContacts, setFilteredContacts] = useState([]);
 
+  /**
+   * Ao abrir a página busca os dados na API
+   */
   useEffect(() => {
     handleFetchData();
   }, []);
 
+  /**
+   * Alguma alteração na variável search dispara a função handleSearch que filtra os dados de acordo com os termos
+   * da busca
+   */
   useEffect(() => {
     handleSearch();
   }, [search]);
 
+  /**
+   * Busca os dados na API
+   * Seta a variável contacts que tem os dados iniciais (todos os dados do banco)
+   * Seta a variável filteredContacts que popula a tabela
+   */
   const handleFetchData = () => {
     fetchClient("http://localhost:3001/api/contacts").then(async (response) => {
       if (response.status === 200) {
@@ -79,6 +95,9 @@ export default function ClientContacts() {
     });
   };
 
+  /**
+   * Exclui um contato e roda handleFetchData pra atualizar a tabela
+   */
   const handleDelete = (id) => {
     if (confirm("Confirma a exclusão do contato?")) {
       fetchClient(`http://localhost:3001/api/contacts/${id}`, {
@@ -89,6 +108,9 @@ export default function ClientContacts() {
     }
   };
 
+  /**
+   * Relação das letras acentuadas e seus substitutos sem acento
+   */
   const mapaAcentos = {
     à: "a",
     á: "a",
@@ -114,7 +136,16 @@ export default function ClientContacts() {
     ü: "u",
   };
 
+  /**
+   * Função que filtra a busca
+   * @param {dados da API} array
+   * @param {termo da busca} termo
+   * @returns resultado do filtro
+   */
   function filtroPorNome(array, termo) {
+    /**
+     * Sanitaliza o termo de busca
+     */
     termo = termo
       .toLowerCase()
       .replace(
@@ -122,7 +153,14 @@ export default function ClientContacts() {
         (match) => mapaAcentos[match] || match
       )
       .replace(/[^a-z0-9]/gi, "");
+    /**
+     * Filtra o array baseado no termo
+     * Retorna o resultado do filtro
+     */
     return array.filter((item) => {
+      /**
+       * Sanitaliza o item name do array de dados
+       */
       let nome = item.name
         .toLowerCase()
         .replace(
@@ -130,14 +168,26 @@ export default function ClientContacts() {
           (match) => mapaAcentos[match] || match
         )
         .replace(/[^a-z0-9]/gi, "");
+      /**
+       * Sanitaliza o item CPF do array de dados
+       */
       let cpf = item.cpf.replace(/[^a-z0-9]/gi, "");
-      console.log(nome, termo);
+
+      /**
+       * Verifica se o termo existe no item nome ou no item CPF
+       */
       const nomeEncontrado =
         nome.toLowerCase().includes(termo) || cpf.toLowerCase().includes(termo);
+      /**
+       * Retorna os items encontrados que contém o termo procurado
+       */
       return nomeEncontrado;
     });
   }
 
+  /**
+   * Executa o filtro por nome ou CPF e preenche a variável que atualiza a tabela
+   */
   const handleSearch = () => {
     const res = filtroPorNome(contacts, search);
     setFilteredContacts(res);

@@ -14,6 +14,10 @@ const NavBar = () => {
   const { data: session, status } = useSession();
   const router = useRouter();
 
+  /**
+   * Retorna a primeira letra do email cadastrado
+   * @returns string
+   */
   const handleInitials = () => {
     if (!session?.user?.email) {
       return "CD";
@@ -23,6 +27,12 @@ const NavBar = () => {
     return first;
   };
 
+  /**
+   * Trata e valida a requisição para exclusão da conta do usuário através da chamada à API
+   * Verifica se a senha é válida
+   * Se positivo faz a deleção da conta do usuário
+   * Emite os alertas pertinentes que serão tratados nas respectivas telas
+   */
   const handleDeleteAccount = () => {
     if (confirm("Confirma a exclusão da sua conta e todos os seus contatos?")) {
       const data = {
@@ -46,6 +56,9 @@ const NavBar = () => {
     }
   };
 
+  /**
+   * Função de Logout da biblioteca next-auth
+   */
   const handleSignout = () => {
     signOut();
     router.push("/");

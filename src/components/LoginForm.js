@@ -7,6 +7,10 @@ import { Suspense, useState } from "react";
 import Image from "next/image";
 import Logo from "../../public/logo.jpg";
 
+/**
+ *  Função/Componente para tratar as mensagens de erro ou sucesso que vem através da URL como parâmetros
+ * @returns elemento | componente
+ */
 function MsgParams() {
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
@@ -76,6 +80,10 @@ function MsgParams() {
   return <div></div>;
 }
 
+/**
+ * Faz o login através das Providers da biblioteca next-auth usando o método signin que está utilizando a API
+ * @returns void
+ */
 export default function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

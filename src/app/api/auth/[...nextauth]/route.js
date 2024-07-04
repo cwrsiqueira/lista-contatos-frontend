@@ -6,6 +6,9 @@ const handler = NextAuth({
   pages: {
     signIn: "/",
   },
+  /**
+   * Provider de autenticação com email e senha da biblioteca next-auth
+   */
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -18,6 +21,9 @@ const handler = NextAuth({
           return null;
         }
 
+        /**
+         * Faz a autenticação com a API própria API_Contatos
+         */
         try {
           const response = await fetch(
             "http://localhost:3001/api/auth/sign_in",
@@ -34,9 +40,10 @@ const handler = NextAuth({
           const headerData = response.headers;
           const bodyData = await response.json();
 
-          console.log("HEADERDATA: " + headerData.get("uid"));
-          console.log(bodyData.data);
-
+          /**
+           * Credenciais de acesso à API: access-token, client e uid
+           * Salvos em cookies para utilização durante a utilização do sistema
+           */
           if (
             !headerData.get("access-token") ||
             !headerData.get("client") ||
