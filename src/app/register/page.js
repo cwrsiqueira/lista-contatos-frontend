@@ -1,6 +1,6 @@
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
-import LoginForm from "../components/LoginForm";
+import RegisterForm from "../../components/RegisterForm";
 
 export default async function Home() {
   const session = await getServerSession();
@@ -12,7 +12,7 @@ export default async function Home() {
   return (
     <main>
       <div className="h-screen flex justify-center items-center bg-slate-600 px-5">
-        <LoginForm />
+        <RegisterForm />
       </div>
     </main>
   );

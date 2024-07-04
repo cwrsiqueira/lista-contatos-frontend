@@ -1,21 +1,22 @@
 "use client";
 
-import { signIn } from "next-auth/react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import Image from "next/image";
 import Logo from "../../public/logo.jpg";
 
+/**
+ * Função verifica as mensagens na URL e retorna um elemento com a respectiva mensagem
+ * @returns elemento | componente
+ */
 function MsgParams() {
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
   const success = searchParams.get("success");
-  const account_confirmation_success = searchParams.get(
-    "account_confirmation_success"
-  );
+  const msg = searchParams.get("msg");
 
-  if (error && error === "CredentialsSignin") {
+  if (error && error === "matchPassword") {
     return (
       <div role="alert" className="alert alert-error">
         <svg
@@ -31,12 +32,12 @@ function MsgParams() {
             d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
           />
         </svg>
-        <span>Credenciais inválidas.</span>
+        <span>Os e-mails devem ser iguais.</span>
       </div>
     );
-  } else if (success && success === "emailSent") {
+  } else if (error && error === "blankfields") {
     return (
-      <div role="alert" className="alert alert-success">
+      <div role="alert" className="alert alert-error">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           className="h-6 w-6 shrink-0 stroke-current"
@@ -47,15 +48,15 @@ function MsgParams() {
             strokeLinecap="round"
             strokeLinejoin="round"
             strokeWidth="2"
-            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+            d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
           />
         </svg>
-        <span>Cadastro efetuado! Favor confirmar seu e-mail.</span>
+        <span>Todos os campos devem ser preechidos.</span>
       </div>
     );
-  } else if (account_confirmation_success) {
+  } else if (error && error === "unknown") {
     return (
-      <div role="alert" className="alert alert-success">
+      <div role="alert" className="alert alert-error">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           className="h-6 w-6 shrink-0 stroke-current"
@@ -66,37 +67,75 @@ function MsgParams() {
             strokeLinecap="round"
             strokeLinejoin="round"
             strokeWidth="2"
-            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+            d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
           />
         </svg>
-        <span>Email confirmado, faça o login.</span>
+        <span>{msg}</span>
       </div>
     );
   }
+
   return <div></div>;
 }
 
-export default function LoginForm() {
+export default function RegisterForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [passwordConfirmation, setPasswordConfirmation] = useState("");
 
-  async function login(e) {
+  const router = useRouter();
+
+  /**
+   * Função recebe os dados do formulário, faz as validações e faz uma chamada na API que registra o usuário.
+   * Se der certo direciona para página de login com a mensagem de sucesso, caso contrário mantém na mesma página
+   * com uma mensagem de erro.
+   * @param {evento} e
+   * @returns void | null
+   */
+  async function register(e) {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const data = {
+      name: formData.get("name"),
       email: formData.get("email"),
       password: formData.get("password"),
+      password_confirmation: formData.get("password_confirmation"),
     };
 
-    signIn("credentials", {
-      ...data,
-      callbackUrl: "/dashboard",
+    if (
+      data.name == "" ||
+      data.email == "" ||
+      data.password == "" ||
+      data.password_confirmation == ""
+    ) {
+      router.push("/register?error=blankfields");
+      return null;
+    }
+
+    if (data.password !== data.password_confirmation) {
+      router.push("/register?error=matchPassword");
+      return null;
+    }
+
+    const response = await fetch("http://localhost:3001/api/auth", {
+      method: "POST",
+      body: JSON.stringify(data),
+      headers: { "Content-Type": "application/json" },
     });
+
+    if (response.status !== 200) {
+      const res = await response.json();
+      console.log(res.errors.full_messages[0]);
+      router.push(`/register?error=unknown&msg=${res.errors.full_messages[0]}`);
+      return null;
+    }
+
+    router.push("/?success=emailSent");
   }
 
   return (
     <form
-      onSubmit={login}
+      onSubmit={register}
       className="bg-white p-12 rounded-lg w-96 max-w-full flex justify-center items-center flex-col gap-2"
     >
       <Image
@@ -107,7 +146,7 @@ export default function LoginForm() {
         priority
       />
       <h1 className="font-bold text-xl mb-6">Contact Dragon</h1>
-      <h1 className="font-bold text-md mb-1">Login</h1>
+      <h1 className="font-bold text-md mb-1">Cadastro</h1>
       <Suspense>
         <MsgParams />
       </Suspense>
@@ -129,12 +168,21 @@ export default function LoginForm() {
         onChange={(e) => setPassword(e.target.value)}
         required
       />
+      <input
+        name="password_confirmation"
+        type="password"
+        placeholder="Confirmar Senha"
+        className="input input-primary w-full"
+        value={passwordConfirmation}
+        onChange={(e) => setPasswordConfirmation(e.target.value)}
+        required
+      />
       <button className="btn btn-primary w-full" type="submit">
-        Login
+        Cadastro
       </button>
       <div className="flex justify-between w-full">
-        <Link href={"/register"}>
-          <small>Não tenho cadastro</small>
+        <Link href={"/"}>
+          <small>Eu já tenho cadastro</small>
         </Link>
       </div>
     </form>

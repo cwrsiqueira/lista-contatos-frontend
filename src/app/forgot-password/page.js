@@ -16,7 +16,6 @@ const Dashboard = async () => {
         <Link href="/contacts/add" className="btn btn-active btn-primary mb-6">
           Adicionar Contato
         </Link>
-
         <ClientContacts />
       </div>
     </div>
