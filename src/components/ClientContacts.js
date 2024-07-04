@@ -4,6 +4,9 @@ import { useEffect, useState } from "react";
 import { fetchClient } from "../libs/fetchClient";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { IMaskInput } from "react-imask";
+import { FaPenToSquare } from "react-icons/fa6";
+import { FaTrashCan } from "react-icons/fa6";
 
 function MsgParams() {
   const searchParams = useSearchParams();
@@ -55,16 +58,23 @@ function MsgParams() {
 
 export default function ClientContacts() {
   const [contacts, setContacts] = useState([]);
+  const [search, setSearch] = useState("");
+  const [filteredContacts, setFilteredContacts] = useState([]);
 
   useEffect(() => {
     handleFetchData();
   }, []);
+
+  useEffect(() => {
+    handleSearch();
+  }, [search]);
 
   const handleFetchData = () => {
     fetchClient("http://localhost:3001/api/contacts").then(async (response) => {
       if (response.status === 200) {
         const data = await response.json();
         setContacts(data);
+        setFilteredContacts(data);
       }
     });
   };
@@ -79,29 +89,121 @@ export default function ClientContacts() {
     }
   };
 
+  const mapaAcentos = {
+    à: "a",
+    á: "a",
+    â: "a",
+    ä: "a",
+    ã: "a",
+    è: "e",
+    é: "e",
+    ê: "e",
+    ë: "e",
+    ì: "i",
+    í: "i",
+    î: "i",
+    ï: "i",
+    ò: "o",
+    ó: "o",
+    ô: "o",
+    ö: "o",
+    õ: "o",
+    ù: "u",
+    ú: "u",
+    û: "u",
+    ü: "u",
+  };
+
+  function filtroPorNome(array, termo) {
+    termo = termo
+      .toLowerCase()
+      .replace(
+        /[àáâãäåèéêëìíîïòóôöùúûü]/g,
+        (match) => mapaAcentos[match] || match
+      )
+      .replace(/[^a-z0-9]/gi, "");
+    return array.filter((item) => {
+      let nome = item.name
+        .toLowerCase()
+        .replace(
+          /[àáâãäåèéêëìíîïòóôöùúûü]/g,
+          (match) => mapaAcentos[match] || match
+        )
+        .replace(/[^a-z0-9]/gi, "");
+      let cpf = item.cpf.replace(/[^a-z0-9]/gi, "");
+      console.log(nome, termo);
+      const nomeEncontrado =
+        nome.toLowerCase().includes(termo) || cpf.toLowerCase().includes(termo);
+      return nomeEncontrado;
+    });
+  }
+
+  const handleSearch = () => {
+    const res = filtroPorNome(contacts, search);
+    setFilteredContacts(res);
+  };
+
   return (
-    <div>
+    <div className="px-3">
+      <div className="flex justify-between">
+        <Link href="/contacts/add" className="btn btn-active btn-primary mb-6">
+          Adicionar Contato
+        </Link>
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          type="search"
+          placeholder="Buscar..."
+          className="input input-bordered md:w-auto w-50"
+        />
+      </div>
       <MsgParams />
       <div className="overflow-x-auto">
         <table className="table table-zebra">
           <thead>
             <tr>
-              <th>ID</th>
               <th>Nome</th>
+              <th>CPF</th>
               <th>Telefone</th>
+              <th>Endereço</th>
               <th></th>
             </tr>
           </thead>
           <tbody>
-            {contacts.map((value, index) => (
+            {filteredContacts.map((value, index) => (
               <tr key={index}>
-                <th>{value.id}</th>
                 <th>{value.name}</th>
-                <th>{value.telephone}</th>
                 <th>
-                  <Link href={`/contacts/edit/${value.id}`}>Editar</Link> |{" "}
+                  <IMaskInput
+                    mask="000.000.000-00"
+                    className=""
+                    value={value.cpf}
+                    onChange={() => value.cpf}
+                    disabled
+                  />
+                </th>
+                <th>
+                  <IMaskInput
+                    mask="(00) 0 0000-0000"
+                    className=""
+                    value={value.telephone}
+                    onChange={() => value.telephone}
+                    disabled
+                  />
+                </th>
+                <th>{value.address}</th>
+                <th className="flex gap-5">
+                  <Link href={`/contacts/edit/${value.id}`}>
+                    <FaPenToSquare
+                      className="text-blue-500 hover:text-blue-400"
+                      size={20}
+                    />
+                  </Link>
                   <button onClick={() => handleDelete(value.id)}>
-                    Excluir
+                    <FaTrashCan
+                      className="text-red-500 hover:text-red-400"
+                      size={20}
+                    />
                   </button>
                 </th>
               </tr>
